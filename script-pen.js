@@ -115,6 +115,41 @@ MechanicalPencil.prototype.erasWrittenText = function (start, stop) {
 };
 
 
+/***
+ * авторучка с множеством паст (разноцветных)
+ * @param colorArray - масив цветов ["blue", "#000000", "green"]
+ * @constructor
+ */
+function MultiColorPen(colorArray) {
+    MechanicalPencil.apply(this, arguments);
+    this.colorArray = colorArray;
+    this.inkValueArray = [100];
+    this.currentColor = 0;
+    this.color = this.colorArray[this.currentColor];
+
+}
+
+MultiColorPen.prototype = Object.create(MechanicalPencil.prototype);
+MultiColorPen.prototype.constructor = MultiColorPen;
+
+MechanicalPencil.prototype.erasable = false;
+MultiColorPen.prototype.switchColor = function () {
+    var tmpNum = this.currentColor;
+    if (this.colorArray.length >= tmpNum + 1) {
+        tmpNum++;
+    } else {
+        tmpNum = 0;
+    }
+    if (this.inkValueArray[tmpNum] === undefined) {
+        this.inkValueArray.push(100);
+    }
+    this.inkValueArray[this.currentColor]=this.inkValue;
+    this.currentColor = tmpNum;
+    this.color = this.colorArray[this.currentColor];
+    this.inkValue = this.inkValueArray[this.currentColor];
+    colorfulConsole("You select " + this.color + " color",this.color);
+};
+
 
 //======================Test===========================
 
@@ -146,9 +181,37 @@ console.log("\n==========MechanicalPencil========");
 
 var apl = new MechanicalPencil("grey");
 console.log("Is AutomaticPen a prototype of MechanicalPencil? "+AutomaticPen.prototype.isPrototypeOf(apl));
+console.log("Is Pen a prototype of MechanicalPencil? "+Pen.prototype.isPrototypeOf(apl));
 testSupply(apl, 10);
 apl.turn();
 testSupply(apl, 10);
 apl.rechargeInk();
 testSupply(apl, 2);
 apl.erasWrittenText(5, 10);
+
+console.log("\n==========MultiColorPen========");
+
+var mcp = new MultiColorPen(["blue", "brown", "green"]);
+console.log("Is MechanicalPencil a prototype of MultiColorPen? "+MechanicalPencil.prototype.isPrototypeOf(mcp));
+console.log("Is AutomaticPen a prototype of MultiColorPen? "+AutomaticPen.prototype.isPrototypeOf(mcp));
+console.log("Is Pen a prototype of MultiColorPen? "+Pen.prototype.isPrototypeOf(mcp));
+mcp.writeText("hi gays");
+testSupply(mcp, 10);
+mcp.turn();
+
+testSupply(mcp, 10);
+mcp.switchColor();
+testSupply(mcp, 10);
+mcp.switchColor();
+testSupply(mcp, 10);
+
+mcp.rechargeInk();
+mcp.switchColor();
+mcp.switchColor();
+mcp.switchColor();
+
+testSupply(mcp, 5);
+mcp.switchColor();
+mcp.rechargeInk();
+testSupply(mcp, 3);
+mcp.erasWrittenText(5, 10);

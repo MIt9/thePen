@@ -60,6 +60,60 @@ AutomaticPen.prototype.writeText = function (text) {
 };
 
 
+/***
+ * Механический карандаш (цветной, так как цвет не указан)
+ * @param color - цвет задается как в css так "#000000" либо так "blue"
+ * @constructor
+ */
+
+function MechanicalPencil(color) {
+    AutomaticPen.apply(this, arguments);
+    this.writtenText = "";
+}
+MechanicalPencil.prototype = Object.create(AutomaticPen.prototype);
+MechanicalPencil.prototype.constructor = MechanicalPencil;
+
+MechanicalPencil.prototype.erasable = true;
+MechanicalPencil.prototype.writeText = function (text) {
+    var oldInkLevel = this.inkValue;
+    AutomaticPen.prototype.writeText.apply(this, arguments);
+    var difference = oldInkLevel - this.inkValue;
+
+    if (difference !== 0) {
+        if (text.length > difference) {
+            this.writtenText = text.slice.apply(0, difference);
+        } else {
+            this.writtenText = text;
+        }
+    }
+    // return this;
+};
+/***
+ * Удаляет промежутки написаного текста
+ * @param start - начиная с этого символа
+ * @param stop - заканчуя этим
+ */
+
+MechanicalPencil.prototype.erasWrittenText = function (start, stop) {
+    if (this.erasable) {
+        if (this.writtenText.length > 0 && (stop < this.writtenText.length)) {
+            var tmp = this.writtenText;
+            var empty = " ";
+            for (var i = start; stop > i; i++) {
+                empty = empty + " ";
+            }
+            this.writtenText = tmp.substring(0, start) + empty + tmp.substring(stop + 1);
+            //console.log("%c" + this.writtenText, "color : " + this.color);
+            colorfulConsole(this.writtenText,this.color);
+        } else {
+            console.log("Wright something and then eras text");
+        }
+    } else {
+        console.log("You can't eras this text");
+    }
+    return this;
+};
+
 
 
 //======================Test===========================
@@ -87,3 +141,14 @@ ap.turn();
 testSupply(ap, 10);
 ap.rechargeInk();
 testSupply(ap, 2);
+
+console.log("\n==========MechanicalPencil========");
+
+var apl = new MechanicalPencil("grey");
+console.log("Is AutomaticPen a prototype of MechanicalPencil? "+AutomaticPen.prototype.isPrototypeOf(apl));
+testSupply(apl, 10);
+apl.turn();
+testSupply(apl, 10);
+apl.rechargeInk();
+testSupply(apl, 2);
+apl.erasWrittenText(5, 10);
